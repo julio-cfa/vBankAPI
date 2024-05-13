@@ -7,6 +7,7 @@ The easiest way to run vBankAPI is by using Docker. You can execute the followin
 
 ```bash
 git clone https://github.com/julio-cfa/BETA-vBankAPI.git
+cd BETA-vBankAPI
 docker build -t vbank-api .
 docker run -d -p 8000:8000 vbank-api
 ```
