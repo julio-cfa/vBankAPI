@@ -1,6 +1,6 @@
 # BETA-vBankAPI
 
-<div align="center"><img src="https://i.imgur.com/hAfUpLo.png" width="300"></center></div>
+<div align="center"><img src="https://i.imgur.com/6Roz3pD.png" width="300"></center></div>
 This is the BETA version of the vBankAPI. An API that was designed to be vulnerable.
 
 ## Installation
