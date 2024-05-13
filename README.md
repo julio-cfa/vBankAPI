@@ -7,12 +7,12 @@ The easiest way to run vBankAPI is by using Docker. You can execute the followin
 
 ```bash
 git clone https://github.com/julio-cfa/BETA-vBankAPI.git
-docker build -t my-fastapi-app .
-docker run -d -p 8000:8000 my-fastapi-app
+docker build -t vbank-api .
+docker run -d -p 8000:8000 vbank-api
 ```
 
 You can now access the API over http://127.0.0.1:8000. However, I'd recommend adding an entry to your /etc/hosts:
 
 ```bash
-sudo echo "127.0.0.1	banq.api" >> /etc/hosts
+sudo echo "127.0.0.1	vbank.api" >> /etc/hosts
 ```
