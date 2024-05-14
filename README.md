@@ -1,11 +1,14 @@
-# BETA-vBankAPI
+# vBankAPI
 
 <div align="center"><img src="https://i.imgur.com/6Roz3pD.png" width="300"></center></div>
-This is the BETA version of the vBankAPI. An API that was designed to be vulnerable.
+<p></p>Vulnerable Bank API (vBankAPI) was designed to be vulnerable. The idea of this API is to help security professionals - especially junior security engineers, junior penetration testers, and the like - understand vulnerabilities that could be found in the wild.</p>
 
-## Installation
 
-The easiest way to run vBankAPI is by using Docker. You can execute the following commands:
+<p>I chose to use FastAPI for two reasons: it is in Python and the syntax and its structure is easy for people who are not very development-savvy to understand. I, myself, am not a developer and struggle quite a lot with some software engineering concepts. Writing this API has helped me a lot and I'd encourage anyone working with application security to develop a similar project.</p>
+
+## Running It
+
+The easiest way to run vBankAPI is by using (you can refer to <a href="https://docs.docker.com/engine/install/">Docker</a>. You can execute the following commands:
 
 ```bash
 git clone https://github.com/julio-cfa/BETA-vBankAPI.git
