@@ -3,7 +3,6 @@
 <div align="center"><img src="https://i.imgur.com/6Roz3pD.png" width="300"></center></div>
 <p></p>Vulnerable Bank API (vBankAPI) was designed to be vulnerable. The idea of this API is to help security professionals - especially junior security engineers, junior penetration testers, and the like - understand vulnerabilities that could be found in the wild.</p>
 
-
 <p>I chose to use FastAPI for two reasons: it is in Python and the syntax and its structure is easy for people who are not very development-savvy to understand. I, myself, am not a developer and struggle quite a lot with some software engineering concepts. Writing this API has helped me a lot and I'd encourage anyone working with application security to develop a similar project.</p>
 
 ## Vulnerabilities
