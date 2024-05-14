@@ -72,6 +72,24 @@ def createDatabase():
                             {values[6]});
             ''')
             conn.commit()
+
+    except sqlite3.Error as sqlite_error:
+        print(f"Error: {sqlite_error}")
+
+    try:
+        print("INFO:     Database created and/or initialized.")
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT,
+                orig_account_number INTEGER,
+                dest_account_number INTEGER,
+                amount NUMERIC(20, 2)
+            )
+        ''')
+
+        conn.commit()
+        print("INFO:     Table 'transactions' created and/or loaded.")
         
     except sqlite3.Error as sqlite_error:
         print(f"Error: {sqlite_error}")

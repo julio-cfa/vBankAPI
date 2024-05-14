@@ -5,7 +5,7 @@ from fastapi import Header, HTTPException
 
 SECRET = "bank1100500934930"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE = 1000
+ACCESS_TOKEN_EXPIRE = 500000
 
 def createAccessToken(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -15,7 +15,7 @@ def createAccessToken(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET, algorithm=ALGORITHM)
-    payload = {"bearer_token": encoded_jwt}
+    payload = {"type":"bearer", "token": encoded_jwt}
     return payload
 
 def validateAccessToken(authorization: Optional[str] = Header(None)):
@@ -34,8 +34,10 @@ def validateAccessToken(authorization: Optional[str] = Header(None)):
         payload = jwt.decode(token_value, SECRET, algorithms=[ALGORITHM])
         return payload
     except JWTError as jwt_error:
-        print(f"Error: {jwt_error}")
-        return False
+        if jwt_error:
+            raise HTTPException(status_code=500, detail=f"{jwt_error}")
+        else:
+            raise HTTPException(status_code=400, detail="Unauthorized")
 
 
 

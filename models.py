@@ -30,9 +30,9 @@ class UserLogin(BaseModel):
 
 class Transfer(BaseModel):
     dest_account: int
-    amount: int
+    amount: float
 
 class EditUser(BaseModel):
-    email: Optional[str]
+    email: str
     username: str
-    password: Optional[str]
+
