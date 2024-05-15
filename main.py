@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
-from models import User, DBUser, UserLogin, Transfer, EditUser
+from models import User, DBUser, UserLogin, Transfer, ChangeEmail, ChangePassword
 from auth import createAccessToken, validateAccessToken
 from database import getDB, createDatabase
 
@@ -102,11 +102,9 @@ async def myProfile(db: Session = Depends(getDB), token = Depends(validateAccess
     return data
 
 @app.post("/api/profile/change-email", description="This endpoint allows users to change their emails", name="Change Email")
-async def changeEmail(change_email: EditUser, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+async def changeEmail(change_email: ChangeEmail, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     email = change_email.email
     username = change_email.username
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     change_email = text(f"""
                 UPDATE users
                 SET email = '{email}'
@@ -118,6 +116,24 @@ async def changeEmail(change_email: EditUser, db: Session = Depends(getDB), toke
     data = {"detail": f"If your user exists, your email will be changed to {email}"}
 
     return data
+
+
+@app.post("/api/profile/change-password", description="This endpoint allows users to change their passwords", name="Change Password")
+async def changeEmail(change_password: ChangePassword, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+    username = change_password.username
+    password = change_password.password
+    change_password_query = text(f"""
+                UPDATE users
+                SET password = '{password}'
+                WHERE username = '{username}';
+            """)
+    db.execute(change_password_query)
+    db.commit()
+
+    data = {"detail": f"Your password was successfully changed!"}
+
+    return data
+
 
 @app.get("/api/users", description="This endpoint allows authenticated admins to retrieve all users in the DB", name="Get Users")
 async def getUsers(db: Session = Depends(getDB), token = Depends(validateAccessToken)):

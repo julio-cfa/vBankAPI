@@ -4,10 +4,11 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE = "sqlite:///./bank.db"
 ENG = create_engine(DATABASE)
+
+# These users are here just so the database is populated with something. This should not be seen as part of the vulnerabilities.
 USERS = [
     {"username": "julio", "password":"123456", "first_name":"Julio", "last_name": "Araujo", "email":"julio@vbank.api", "balance":'9225.91', "account_number":'1001'},
     {"username": "thiago", "password":"mdr0g123!", "first_name":"Thiago", "last_name": "Araujo", "email":"thiago@vbank.api", "balance":'6377.34', "account_number":'1002'},
-    {"username": "alan", "password":"1ndp@ss", "first_name":"Alan", "last_name": "Henrique", "email":"alan@vbank.api", "balance":'5242.52', "account_number":'1003'},
     {"username": "bido", "password":"b1d0wsg4uch0", "first_name":"Eduardo", "last_name": "Bido", "email":"bido@vbank.api", "balance":'3967.12', "account_number":'1004'},
     {"username": "pierre", "password":"l3m0tD3p@ss3", "first_name":"Pierre", "last_name": "Victorion", "email":"pierre@lemeilleurmail.fr", "balance":'122001.48', "account_number":'1005'},
     {"username": "john", "password":"myreallyLongpass.!", "first_name":"John", "last_name": "Smith", "email":"john@mymayl.us", "balance":'41011.59', "account_number":'1006'},

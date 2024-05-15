@@ -32,7 +32,10 @@ class Transfer(BaseModel):
     dest_account: int
     amount: float
 
-class EditUser(BaseModel):
+class ChangeEmail(BaseModel):
     email: str
     username: str
 
+class ChangePassword(BaseModel):
+    password: str
+    username: str

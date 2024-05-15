@@ -8,13 +8,12 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE = 500000
 
 def createAccessToken(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET, algorithm=ALGORITHM)
+    data.update({"exp": expire})
+    encoded_jwt = jwt.encode(data, SECRET, algorithm=ALGORITHM)
     payload = {"type":"bearer", "token": encoded_jwt}
     return payload
 
