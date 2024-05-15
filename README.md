@@ -27,7 +27,15 @@ docker build -t vbank-api .
 docker run -d -p 8000:8000 vbank-api
 ```
 
-You can now access the API over http://127.0.0.1:8000. However, I'd recommend adding an entry to your /etc/hosts:
+If you want to run it without Docker, it is also possible:
+```bash
+git clone https://github.com/julio-cfa/vBankAPI.git
+cd vBankAPI
+pip3 install -r requirements.txt
+uvicorn main:app --reload
+```
+
+Either way you will be able to access the API over http://127.0.0.1:8000. However, I would recommend adding an entry to your /etc/hosts:
 
 ```bash
 sudo echo "127.0.0.1	vbank.api" >> /etc/hosts
