@@ -12,7 +12,7 @@ The flaws in this API include, but are not limited to:
 - Insecure CORS
 - Information Disclosure
 - SQL Injection
-- OS Command Injection
+- Hidden Functionality (Backdoor)
 - Hardcoded Secrets
 - Security Misconfiguration
 
