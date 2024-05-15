@@ -21,8 +21,8 @@ The flaws in this API include, but are not limited to:
 The easiest way to run vBankAPI is by using <a href="https://docs.docker.com/engine/install/">Docker</a>. You can execute the following commands:
 
 ```bash
-git clone https://github.com/julio-cfa/BETA-vBankAPI.git
-cd BETA-vBankAPI
+git clone https://github.com/julio-cfa/vBankAPI.git
+cd vBankAPI
 docker build -t vbank-api .
 docker run -d -p 8000:8000 vbank-api
 ```
