@@ -42,7 +42,7 @@ Either way you will be able to access the API over http://127.0.0.1:8000. Howeve
 sudo echo "127.0.0.1	vbank.api" >> /etc/hosts
 ```
 
-After that, you will be able to access the API over http://vbank.api.
+After that, you will be able to access the API over http://vbank.api:8000.
 
 ## Testing The API
 
