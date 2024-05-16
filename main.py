@@ -148,7 +148,11 @@ async def changePassword(change_password: ChangePassword, db: Session = Depends(
 
     check_password_query = text(f"SELECT password FROM users WHERE username = :x")
     check_password_query = check_password_query.bindparams(x=username)
-    result = db.execute(check_password_query).fetchone()[0]
+    result = db.execute(check_password_query).fetchone()
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = result[0]
+    
 
     if current_password != result:
         raise HTTPException(status_code=400, detail="Current password is not valid.")
