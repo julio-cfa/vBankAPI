@@ -46,3 +46,9 @@ After that, you will be able to access the API over http://vbank.api.
 
 ## Testing The API
 
+The way this project was designed, this API should be tested with a white-box approach. You should run a SAST, perform a manual code review, and also a penetration test. There are vulnerabilities that can only be detected by inspecting the code.
+
+The API code is simple enough so that people with not a lot of programming and/or code review experience can go through the code and find such vulnerabilities.
+
+At http://127.0.0.1:8000/docs you will find documentation that you can leverage for your tests.
+
