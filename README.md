@@ -13,6 +13,7 @@ The flaws in this API include, but are not limited to:
 - Information Disclosure
 - SQL Injection
 - Hidden Functionality (Backdoor)
+- OS Command Injection
 - Hardcoded Secrets
 - Security Misconfiguration
 
