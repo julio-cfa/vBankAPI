@@ -98,8 +98,6 @@ async def authUser(login: UserLogin, db: Session = Depends(getDB)):
 
 @app.get("/api/profile", description="This endpoint allows you to get the current user information.", name="Current user info")
 async def myProfile(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     get_user_query = text(f"SELECT * FROM users WHERE username = '{token['username']}'")
     result = db.execute(get_user_query)
     columns = result.keys()
@@ -159,11 +157,7 @@ async def changePassword(change_password: ChangePassword, db: Session = Depends(
 
     if new_password != confirm_password:
         raise HTTPException(status_code=400, detail="Parameters new_password and confirm_password do not match!")
-    change_password_query = text(f"""
-                UPDATE users
-                SET password = :x
-                WHERE username = :y;
-            """)
+    change_password_query = text(f"UPDATE users SET password = :x WHERE username = :y;")
     change_password_query = change_password_query.bindparams(x=new_password, y=username)
     db.execute(change_password_query)
     db.commit()
@@ -235,11 +229,7 @@ async def transferMoney(transfer: Transfer, db: Session = Depends(getDB), token 
     if to_transfer > curr_amount_orig_acc:
         raise HTTPException(status_code=401, detail="You're trying to transfer more than what you have in your account.")
     
-    add_to_dest_account = text(f"""
-                UPDATE users
-                SET balance = {new_amount_dest_acc}
-                WHERE account_number = {transfer.dest_account};
-            """)
+    add_to_dest_account = text(f"UPDATE users SET balance = {new_amount_dest_acc} WHERE account_number = {transfer.dest_account};")
     
     add_to_orig_account = text(f"""
                 UPDATE users
