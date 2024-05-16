@@ -1,6 +1,6 @@
 # vBankAPI
 
-<div align="center"><img src="https://i.imgur.com/6Roz3pD.png" width="300"></center></div>
+<div align="center"><img src="https://i.imgur.com/6GoqypC.png" width="350"></center></div>
 <p></p>Vulnerable Bank API (vBankAPI) was designed to be vulnerable. The idea of this API is to help security professionals - especially junior security engineers, junior penetration testers, and the like - understand vulnerabilities that could be found in the wild.</p>
 
 <p>I decided to use FastAPI for two reasons: 1) it is in Python; and 2) the syntax and its structure is easy for people who are not very development-savvy to understand. I, myself, am not a developer and still struggle with some software engineering concepts. Writing this API has helped me a lot and I would encourage anyone working with application security to develop a similar project.</p>
@@ -36,11 +36,13 @@ pip3 install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Either way you will be able to access the API over http://127.0.0.1:8000. However, I would recommend adding an entry to your /etc/hosts:
+Either way you will be able to access the API over http://127.0.0.1:8000. However, I would recommend adding an entry to your `/etc/hosts`:
 
 ```bash
 sudo echo "127.0.0.1	vbank.api" >> /etc/hosts
 ```
 
 After that, you will be able to access the API over http://vbank.api.
+
+## Testing The API
 
