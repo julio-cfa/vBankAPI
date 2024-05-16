@@ -32,10 +32,14 @@ class Transfer(BaseModel):
     dest_account: int
     amount: float
 
-class ChangeEmail(BaseModel):
-    email: str
-    username: str
-
 class ChangePassword(BaseModel):
-    password: str
     username: str
+    current_password: str
+    new_password: str
+    confirm_password: str
+
+class EditUser(BaseModel):
+    username: str
+    email: Optional[EmailStr] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None

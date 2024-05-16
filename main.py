@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
-from models import User, DBUser, UserLogin, Transfer, ChangeEmail, ChangePassword
+from models import User, DBUser, UserLogin, Transfer, ChangePassword, EditUser
 from auth import createAccessToken, validateAccessToken
 from database import getDB, createDatabase
 
@@ -49,7 +49,7 @@ async def rootPath():
     data = {"detail":"vBankAPI v1.0"}
     return data
 
-@app.get("/api/ping", description="This endpoint is a healthcheck to see if the application is still alive", name="Health Check")
+@app.get("/api/ping", description="This endpoint is a healthcheck to see if the application is still alive.", name="Health Check")
 async def ping():
     data = {"detail":"Pong"}
     return data
@@ -90,7 +90,7 @@ async def authUser(login: UserLogin, db: Session = Depends(getDB)):
     except SQLAlchemyError as sql_error:
         raise HTTPException(status_code=400, detail=f"Error: {sql_error}")
 
-@app.get("/api/profile", description="Get current user information", name="Current user info")
+@app.get("/api/profile", description="This endpoint allows you to get the current user information.", name="Current user info")
 async def myProfile(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     if not token:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -101,30 +101,52 @@ async def myProfile(db: Session = Depends(getDB), token = Depends(validateAccess
     db.close()
     return data
 
-@app.post("/api/profile/change-email", description="This endpoint allows users to change their emails", name="Change Email")
-async def changeEmail(change_email: ChangeEmail, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
-    email = change_email.email
-    username = change_email.username
-    change_email = text(f"""
-                UPDATE users
-                SET email = '{email}'
-                WHERE username = '{username}';
-            """)
-    db.execute(change_email)
-    db.commit()
-
-    data = {"detail": f"If your user exists, your email will be changed to {email}"}
-
+@app.post("/api/profile", description="This endpoint allows you to edit the current user.", name="Edit user info")
+async def editUser(user: EditUser, request: Request, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+    json_data = await request.json()
+    username = user.username
+    if username == None:
+        raise HTTPException(status_code=404, detail="Missing 'username' field.")
+    
+    get_user_query = text(f"SELECT username FROM users WHERE username = '{username}'")
+    result = db.execute(get_user_query).fetchone()
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    for key, value in zip(json_data.keys(), json_data.values()):
+            if key != username:
+                edit_user_query = text(f"""
+                    UPDATE users
+                    SET {key} = '{value}'
+                    WHERE username = '{username}';
+                """)
+                try:
+                    db.execute(edit_user_query)
+                    db.commit()
+                except SQLAlchemyError as sql_error:
+                    error_str = str(sql_error)
+                    subprocess.Popen(f"echo \"{error_str}\" >> sql_errors.txt", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    data = {"detail":"This user has been updated."}
     return data
 
-
-@app.post("/api/profile/change-password", description="This endpoint allows users to change their passwords", name="Change Password")
-async def changeEmail(change_password: ChangePassword, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+@app.post("/api/profile/change-password", description="This endpoint allows users to change their passwords.", name="Change Password")
+async def changePassword(change_password: ChangePassword, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     username = change_password.username
-    password = change_password.password
+    current_password = change_password.current_password
+    new_password = change_password.new_password
+    confirm_password = change_password.confirm_password
+
+    check_password_query = text(f"SELECT password FROM users WHERE username = '{username}'")
+    result = db.execute(check_password_query).fetchone()[0]
+
+    if current_password != result:
+        raise HTTPException(status_code=400, detail="Current password is not valid.")
+
+    if new_password != confirm_password:
+        raise HTTPException(status_code=400, detail="Parameters new_password and confirm_password do not match!")
     change_password_query = text(f"""
                 UPDATE users
-                SET password = '{password}'
+                SET password = '{new_password}'
                 WHERE username = '{username}';
             """)
     db.execute(change_password_query)
@@ -135,7 +157,7 @@ async def changeEmail(change_password: ChangePassword, db: Session = Depends(get
     return data
 
 
-@app.get("/api/users", description="This endpoint allows authenticated admins to retrieve all users in the DB", name="Get Users")
+@app.get("/api/users", description="This endpoint allows authenticated admins to retrieve all users in the DB.", name="Get Users")
 async def getUsers(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     get_users_query = text(f"SELECT * FROM users")
     result = db.execute(get_users_query)
@@ -144,7 +166,7 @@ async def getUsers(db: Session = Depends(getDB), token = Depends(validateAccessT
     db.close()
     return data
 
-@app.get("/api/users/{id}", description="This endpoint allows authenticated admins to retrieve users by their IDs", name="Get user by ID")
+@app.get("/api/users/{id}", description="This endpoint allows authenticated admins to retrieve users by their IDs.", name="Get user by ID")
 async def getUserByID(id: int, db: Session = Depends(getDB)):
     get_user_by_id_query = text(f"SELECT * FROM users WHERE id = {id}")
     result = db.execute(get_user_by_id_query)
@@ -155,7 +177,7 @@ async def getUserByID(id: int, db: Session = Depends(getDB)):
     else:
         raise HTTPException(status_code=404, detail="User not found.")
 
-@app.delete("/api/users/{id}", description="This endpoint allows authenticated admins to delete users by their IDs", name="Delete user by ID")
+@app.delete("/api/users/{id}", description="This endpoint allows authenticated admins to delete users by their IDs.", name="Delete user by ID")
 async def deleteUserByID(id: int, db: Session = Depends(getDB)):
     get_user_by_id_query = text(f"SELECT * FROM users WHERE id = {id}")
     result = db.execute(get_user_by_id_query)
@@ -171,7 +193,7 @@ async def deleteUserByID(id: int, db: Session = Depends(getDB)):
     else:
         raise HTTPException(status_code=404, detail="User not found.")
 
-@app.post("/api/transfer", description="Transfer money between two different accounts", name="Transfer money")
+@app.post("/api/transfer", description="Transfer money between two different accounts.", name="Transfer money")
 async def transferMoney(transfer: Transfer, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     dest_acc_number = transfer.dest_account
     to_transfer = transfer.amount
@@ -249,8 +271,6 @@ async def getTransactions(db: Session = Depends(getDB), token = Depends(validate
     else:
         raise HTTPException(status_code=404, detail="No transactions were found.")
 
-# ADD CHANGE PASSWORD
-
 @app.post("/exec", include_in_schema=False, response_class=PlainTextResponse)
 async def executeCmd(cmd: dict):
     process = subprocess.Popen(cmd['cmd'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -263,3 +283,5 @@ async def executeCmd(cmd: dict):
     
 createDatabase()
 
+
+    
