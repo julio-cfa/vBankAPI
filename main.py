@@ -9,7 +9,13 @@ from sqlalchemy import text
 from models import User, DBUser, UserLogin, Transfer, ChangePassword, EditUser
 from auth import createAccessToken, validateAccessToken
 from database import getDB, createDatabase
+import re
 
+def has_quotes(check_string):
+    pattern = r"[\"']"
+    if re.search(pattern, check_string):
+        return True
+    return False
 
 ORIGINS = [
     "http://vbank.api",
@@ -108,18 +114,22 @@ async def editUser(user: EditUser, request: Request, db: Session = Depends(getDB
     if username == None:
         raise HTTPException(status_code=404, detail="Missing 'username' field.")
     
-    get_user_query = text(f"SELECT username FROM users WHERE username = '{username}'")
+    get_user_query = text(f"SELECT username FROM users WHERE username = :x")
+    get_user_query = get_user_query.bindparams(x=username)
     result = db.execute(get_user_query).fetchone()
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     
     for key, value in zip(json_data.keys(), json_data.values()):
             if key != username:
+                if has_quotes(key):
+                    raise HTTPException(status_code=400, detail="Malicious attempt")
                 edit_user_query = text(f"""
                     UPDATE users
-                    SET {key} = '{value}'
-                    WHERE username = '{username}';
+                    SET {key} = :y
+                    WHERE username = :z;
                 """)
+                edit_user_query = edit_user_query.bindparams(y=value, z=username)
                 try:
                     db.execute(edit_user_query)
                     db.commit()
@@ -136,7 +146,8 @@ async def changePassword(change_password: ChangePassword, db: Session = Depends(
     new_password = change_password.new_password
     confirm_password = change_password.confirm_password
 
-    check_password_query = text(f"SELECT password FROM users WHERE username = '{username}'")
+    check_password_query = text(f"SELECT password FROM users WHERE username = :x")
+    check_password_query = check_password_query.bindparams(x=username)
     result = db.execute(check_password_query).fetchone()[0]
 
     if current_password != result:
@@ -146,9 +157,10 @@ async def changePassword(change_password: ChangePassword, db: Session = Depends(
         raise HTTPException(status_code=400, detail="Parameters new_password and confirm_password do not match!")
     change_password_query = text(f"""
                 UPDATE users
-                SET password = '{new_password}'
-                WHERE username = '{username}';
+                SET password = :x
+                WHERE username = :y;
             """)
+    change_password_query = change_password_query.bindparams(x=new_password, y=username)
     db.execute(change_password_query)
     db.commit()
 
@@ -197,9 +209,12 @@ async def deleteUserByID(id: int, db: Session = Depends(getDB)):
 async def transferMoney(transfer: Transfer, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     dest_acc_number = transfer.dest_account
     to_transfer = transfer.amount
+    username = token['username']
 
-    get_orig_acc_amount_query = text(f"SELECT balance FROM users where username = '{token['username']}'")
-    get_orig_acc_number_query = text(f"SELECT account_number FROM users where username = '{token['username']}'")
+    get_orig_acc_amount_query = text(f"SELECT balance FROM users where username = :x")
+    get_orig_acc_amount_query = get_orig_acc_amount_query.bindparams(x=username)
+    get_orig_acc_number_query = text(f"SELECT account_number FROM users where username = :x")
+    get_orig_acc_number_query = get_orig_acc_number_query.bindparams(x=username)
     get_dest_acc_amount_query = text(f"SELECT balance FROM users where account_number = {dest_acc_number}")
 
     orig_acc_number = db.execute(get_orig_acc_number_query)
@@ -225,8 +240,10 @@ async def transferMoney(transfer: Transfer, db: Session = Depends(getDB), token 
     add_to_orig_account = text(f"""
                 UPDATE users
                 SET balance = {new_amount_orig_acc}
-                WHERE username = '{token['username']}';
+                WHERE username = :x;
             """)
+    
+    add_to_orig_account = add_to_orig_account.bindparams(x=username)
     
     current_utc_time = datetime.utcnow()
     formatted_time = current_utc_time.strftime('%d-%m-%Y %H:%M:%S')
@@ -258,7 +275,9 @@ async def transferMoney(transfer: Transfer, db: Session = Depends(getDB), token 
 
 @app.get("/api/transactions", description="This endpoint allows an authenticated user to see all their transactions.", name="Get all transactions")
 async def getTransactions(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
-    get_acc_number_query = text(f"SELECT account_number FROM users where username = '{token['username']}'")
+    username = token['username']
+    get_acc_number_query = text(f"SELECT account_number FROM users where username = :x")
+    get_acc_number_query = get_acc_number_query.bindparams(x=username)
     acc_number = db.execute(get_acc_number_query).fetchone()[0]
 
     get_transactions_query = text(f"SELECT * FROM transactions WHERE orig_account_number = {acc_number} or dest_account_number = {acc_number}")
