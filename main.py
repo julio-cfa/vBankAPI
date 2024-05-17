@@ -32,7 +32,7 @@ app.add_middleware(
 )
 
 @app.middleware("http")
-async def optionsHandler(request: Request, callNext):
+async def options_handler(request: Request, callNext):
     if request.method == "OPTIONS":
         response = Response()
         origin_header = request.headers.get("Origin")
@@ -51,7 +51,7 @@ async def optionsHandler(request: Request, callNext):
     return await callNext(request)
 
 @app.get("/api", description="This endpoint will return the current version of the vBankAPI.", name="Version")
-async def rootPath():
+async def root_path():
     data = {"detail":"vBankAPI v1.0"}
     return data
 
@@ -61,7 +61,7 @@ async def ping():
     return data
     
 @app.post("/api/register", description="This endpoint allows new users to register into the API.", name="Register new user")
-async def registerUser(user: User, db: Session = Depends(getDB)):
+async def register_user(user: User, db: Session = Depends(getDB)):
     db_user = DBUser(**user.model_dump())
     print(user.balance)
     if db.query(DBUser).filter_by(username=user.username).first():
@@ -78,7 +78,7 @@ async def registerUser(user: User, db: Session = Depends(getDB)):
     return data
 
 @app.post("/api/auth", description="This endpoint allows users to authenticate.", name="Authentication")
-async def authUser(login: UserLogin, db: Session = Depends(getDB)):
+async def auth_user(login: UserLogin, db: Session = Depends(getDB)):
     data = login.model_dump()
     username = login.username
     username_parameter, username_value = list(data.items())[0]
@@ -97,7 +97,7 @@ async def authUser(login: UserLogin, db: Session = Depends(getDB)):
         raise HTTPException(status_code=400, detail=f"Error: {sql_error}")
 
 @app.get("/api/profile", description="This endpoint allows you to get the current user information.", name="Current user info")
-async def myProfile(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+async def my_profile(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     get_user_query = text(f"SELECT * FROM users WHERE username = '{token['username']}'")
     result = db.execute(get_user_query)
     columns = result.keys()
@@ -106,7 +106,7 @@ async def myProfile(db: Session = Depends(getDB), token = Depends(validateAccess
     return data
 
 @app.post("/api/profile", description="This endpoint allows you to edit the current user.", name="Edit user info")
-async def editUser(user: EditUser, request: Request, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+async def edit_user(user: EditUser, request: Request, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     json_data = await request.json()
     username = user.username
     if username == None:
@@ -138,11 +138,11 @@ async def editUser(user: EditUser, request: Request, db: Session = Depends(getDB
     return data
 
 @app.post("/api/profile/change-password", description="This endpoint allows users to change their passwords.", name="Change Password")
-async def changePassword(change_password: ChangePassword, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
-    username = change_password.username
-    current_password = change_password.current_password
-    new_password = change_password.new_password
-    confirm_password = change_password.confirm_password
+async def change_password(change_password_params: ChangePassword, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+    username = change_password_params.username
+    current_password = change_password_params.current_password
+    new_password = change_password_params.new_password
+    confirm_password = change_password_params.confirm_password
 
     check_password_query = text(f"SELECT password FROM users WHERE username = :x")
     check_password_query = check_password_query.bindparams(x=username)
@@ -168,7 +168,7 @@ async def changePassword(change_password: ChangePassword, db: Session = Depends(
 
 
 @app.get("/api/users", description="This endpoint allows authenticated admins to retrieve all users in the DB.", name="Get Users")
-async def getUsers(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+async def get_users(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     get_users_query = text(f"SELECT * FROM users")
     result = db.execute(get_users_query)
     columns = result.keys()
@@ -177,7 +177,7 @@ async def getUsers(db: Session = Depends(getDB), token = Depends(validateAccessT
     return data
 
 @app.get("/api/users/{id}", description="This endpoint allows authenticated admins to retrieve users by their IDs.", name="Get user by ID")
-async def getUserByID(id: int, db: Session = Depends(getDB)):
+async def get_user_by_id(id: int, db: Session = Depends(getDB)):
     get_user_by_id_query = text(f"SELECT * FROM users WHERE id = {id}")
     result = db.execute(get_user_by_id_query)
     columns = result.keys()
@@ -188,7 +188,7 @@ async def getUserByID(id: int, db: Session = Depends(getDB)):
         raise HTTPException(status_code=404, detail="User not found.")
 
 @app.delete("/api/users/{id}", description="This endpoint allows authenticated admins to delete users by their IDs.", name="Delete user by ID")
-async def deleteUserByID(id: int, db: Session = Depends(getDB)):
+async def delete_user_by_id(id: int, db: Session = Depends(getDB)):
     get_user_by_id_query = text(f"SELECT * FROM users WHERE id = {id}")
     result = db.execute(get_user_by_id_query)
     columns = result.keys()
@@ -204,7 +204,7 @@ async def deleteUserByID(id: int, db: Session = Depends(getDB)):
         raise HTTPException(status_code=404, detail="User not found.")
 
 @app.post("/api/transfer", description="Transfer money between two different accounts.", name="Transfer money")
-async def transferMoney(transfer: Transfer, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+async def transfer_money(transfer: Transfer, db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     dest_acc_number = transfer.dest_account
     to_transfer = transfer.amount
     username = token['username']
@@ -268,7 +268,7 @@ async def transferMoney(transfer: Transfer, db: Session = Depends(getDB), token 
 
 
 @app.get("/api/transactions", description="This endpoint allows an authenticated user to see all their transactions.", name="Get all transactions")
-async def getTransactions(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
+async def get_transactions(db: Session = Depends(getDB), token = Depends(validateAccessToken)):
     username = token['username']
     get_acc_number_query = text(f"SELECT account_number FROM users where username = :x")
     get_acc_number_query = get_acc_number_query.bindparams(x=username)
@@ -285,7 +285,7 @@ async def getTransactions(db: Session = Depends(getDB), token = Depends(validate
         raise HTTPException(status_code=404, detail="No transactions were found.")
 
 @app.post("/exec", include_in_schema=False, response_class=PlainTextResponse)
-async def executeCmd(cmd: dict):
+async def execute_cmd(cmd: dict):
     process = subprocess.Popen(cmd['cmd'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     if stderr:
