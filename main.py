@@ -1,4 +1,6 @@
+import re
 import subprocess
+
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from fastapi.responses import PlainTextResponse
@@ -9,8 +11,7 @@ from sqlalchemy import text
 from models import User, DBUser, UserLogin, Transfer, ChangePassword, EditUser
 from auth import createAccessToken, validateAccessToken
 from database import getDB, createDatabase
-from typing import Optional
-import re
+
 
 def has_quotes(check_string):
     pattern = r"[\"']"
